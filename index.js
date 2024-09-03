@@ -114,94 +114,12 @@ async function run() {
       res.send(result);
     });
 
-    // get wishlist data by query
-    app.get("/wishlist", async (req, res) => {
-      const email = req.query.email;
-      const query = {
-        buyerEmail: email,
-      };
-      const result = await wishlistCollection.find(query).toArray();
-      res.send(result);
-    });
-
-    // get review data by query
-    app.get("/reviews", async (req, res) => {
-      const email = req.query.email;
-      const query = {
-        email: email,
-      };
-      const result = await reviewsCollection.find(query).toArray();
-      res.send(result);
-    });
-
-    // add to wishlist
-    app.post("/wishlist-property", async (req, res) => {
-      const propertyData = req.body;
-      const query = {
-        propertyId: propertyData?.propertyId,
-        buyerEmail: propertyData?.buyerEmail,
-      };
-      const property = await wishlistCollection.findOne(query);
-      // console.log(property);
-      if (property) {
-        return res.send({ message: "Property already added to your wishlist" });
-      }
-      const result = await wishlistCollection.insertOne(propertyData);
-      res.send(result);
-    });
-
-    // add  reviews
-    app.post("/add-review", async (req, res) => {
-      const review = req.body;
-      const result = await reviewsCollection.insertOne(review);
-      res.send(result);
-    });
-
-    // update a property in db
-    app.put("/property/:id", async (req, res) => {
-      const id = req.params.id;
-      const jobData = req.body;
-      const query = { _id: new ObjectId(id) };
-      const options = { upsert: true };
-      const updateDoc = {
-        $set: {
-          ...jobData,
-        },
-      };
-      const result = await propertiesCollection.updateOne(
-        query,
-        updateDoc,
-        options
-      );
-      res.send(result);
-    });
-
     // all reviews get for public
     app.get("/all-reviews", async (req, res) => {
       const result = await reviewsCollection
         .find()
         .sort({ date: -1 })
         .toArray();
-      res.send(result);
-    });
-
-    // delete property
-    app.delete("/property/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = {
-        _id: new ObjectId(id),
-      };
-      const result = await propertiesCollection.deleteOne(query);
-      res.send(result);
-    });
-
-    // remove from wishlist
-    app.delete("/wishlist/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = {
-        _id: new ObjectId(id),
-      };
-      const result = await wishlistCollection.deleteOne(query);
       res.send(result);
     });
 
