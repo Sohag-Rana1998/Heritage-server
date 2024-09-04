@@ -40,6 +40,7 @@ async function run() {
     const wishlistCollection = client.db("RealStateDb").collection("wishlist");
     const reviewsCollection = client.db("RealStateDb").collection("reviews");
 
+    // Get all property
     app.get("/all-properties", async (req, res) => {
       const result = await propertiesCollection.find().toArray();
       res.send(result);
@@ -99,6 +100,7 @@ async function run() {
       res.send({ count });
     });
 
+    // Get property by id
     app.get("/property/:id", async (req, res) => {
       const id = req.params.id;
       const query = {
@@ -108,9 +110,47 @@ async function run() {
       res.send(result);
     });
 
+    // Get property by email
+    app.get("/seller-properties", async (req, res) => {
+      const email = req.query.email;
+      const query = {
+        sellerEmail: email,
+      };
+      const result = await propertiesCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.post("/add-property", async (req, res) => {
       const property = req.body;
       const result = await propertiesCollection.insertOne(property);
+      res.send(result);
+    });
+
+    // update a property in db
+    app.put("/property/:id", async (req, res) => {
+      const id = req.params.id;
+      const propertyData = req.body;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          ...propertyData,
+        },
+      };
+      const result = await propertiesCollection.updateOne(
+        query,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    app.delete("/delete-property/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        _id: new ObjectId(id),
+      };
+      const result = await propertiesCollection.deleteOne(query);
       res.send(result);
     });
 
