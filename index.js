@@ -51,13 +51,18 @@ async function run() {
       const page = parseInt(req.query.page) - 1;
       const size = parseInt(req.query.size);
       const search = req.query.search;
+      const location = req.query.location;
       const maxPrice = parseInt(req.query.maxPrice);
       const minPrice = parseInt(req.query.minPrice);
+      console.log(search, location);
       let query = {};
-      if (search)
-        query = {
-          location: { $regex: search, $options: "i" },
-        };
+
+      if (search) {
+        query.title = { $regex: search, $options: "i" };
+      }
+      if (location) {
+        query.location = { $regex: location, $options: "i" };
+      }
 
       if (maxPrice > 0 && minPrice > 0) {
         query = {
@@ -70,34 +75,8 @@ async function run() {
         .skip(page * size)
         .limit(size)
         .toArray();
-      res.send(result);
-    });
-
-    // Get  count for pagination
-    app.get("/count-properties", async (req, res) => {
-      const status = req.query.status;
-      const search = req.query.search;
-      const maxPrice = parseInt(req.query.maxPrice);
-      const minPrice = parseInt(req.query.minPrice);
-
-      let query = {
-        status: status,
-      };
-      if (search)
-        query = {
-          location: { $regex: search, $options: "i" },
-          status: status,
-        };
-      if (maxPrice > 0 && minPrice > 0) {
-        query = {
-          minimumPrice: { $gte: minPrice },
-          maximumPrice: { $lte: maxPrice },
-        };
-      }
-
       const count = await propertiesCollection.countDocuments(query);
-      //   console.log(count);
-      res.send({ count });
+      res.send({ result, count });
     });
 
     // Get property by id
